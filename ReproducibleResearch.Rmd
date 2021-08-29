@@ -1,0 +1,15 @@
+---
+title: "Reproducible Research"
+author: "Syed Arsalan Ghani"
+date: "8/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Titanic
+summary (Titanic)
+```
