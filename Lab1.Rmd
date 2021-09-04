@@ -1,0 +1,190 @@
+---
+title: "Bio 259L/459L Lab 1: Intro to R"
+author: "Syed Arsalan Ghani"
+date: "Deadline: 11:59 pm Sunday 12 Sept."
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "") #set your working directory
+```
+
+# Learning goals
+
+In this lab, you will demonstrate your ability to:
+
+* import, export, and manipulate data in R
+* perform basic data analyses and visualization in R
+
+We will walk you through some exploratory analyses and visualizations of county-level biodiversity data from the New York State Department of Environmental Conservation (NYS DEC).
+
+Please knit your completed notebook to a PDF document and upload the PDF to Blackboard before the deadline. If you cannot get your document to knit, please send us the `nb.html` preview file.
+
+You may discuss this lab with your classmates but cannot directly copy any writing or code. Please list who you worked with: 
+
+*Don't forget to thoroughly comment your code!*
+
+# Biodiversity data exploration
+
+You are in charge of helping the NYS DEC identify locations for land acquisition. The goal is to protect areas with significant ecological activity for land conservation as well as lands containing species that are at risk. Your task is to identify counties in which you believe land should be protected.
+
+## Loading libraries
+First, load the package `tidyverse`. 
+
+```{r load_lib, message = FALSE}
+library(tidyverse)
+library(dplyr)
+```
+
+## The dataset
+
+Go to the [NYS DEC website](https://data.ny.gov/Energy-Environment/Biodiversity-by-County-Distribution-of-Animals-Pla/tk82-7km5) to learn more about the data we are using. Be sure to read the column descriptions. 
+
+**Question:** This dataset was compiled from three databases. What are the three databases that contributed to this dataset?
+The three databases are:
+1) _New York Natural Heritage Program biodiversity database_, which looks at rare plants and animals, 
+2) _2nd NYS Breeding Bird Atlas Project database_, which looks at breeding birds between 2000-2005,
+3) _DEC’s NYS Reptile and Amphibian Database_, which looks at reptiles and amphibians.    
+
+## Importing and checking the data
+
+We already downloaded the dataset as the csv file `NY_Biodiversity_by_County.csv`. Import these data into R. Use the argument `stringsAsFactors = FALSE` (look it up if you don't know what this argument does).
+
+```{r import}
+NYDATA<-read.csv("NY_Biodiversity_by_County.csv", stringsAsFactors = FALSE) 
+#Initial Import
+```
+
+Next, let's quickly examine the data frame to make sure the data importation step worked.
+
+```{r check}
+# How many rows and columns are there?
+dim(NYDATA) #Using dimension function
+# 20017 rows, and 12 columns.
+
+# What is the class of each column?
+class(NYDATA$County)
+class(NYDATA$Category)
+class(NYDATA$Taxonomic.Group)
+class(NYDATA$Taxonomic.Subgroup)
+class(NYDATA$Scientific.Name)
+class(NYDATA$Common.Name)
+class(NYDATA$Year.Last.Documented)
+class(NYDATA$NY.Listing.Status)
+class(NYDATA$Federal.Listing.Status)
+class(NYDATA$State.Conservation.Rank)
+class(NYDATA$Global.Conservation.Rank)
+class(NYDATA$Distribution.Status)
+
+#or
+
+lapply(NYDATA, class)
+
+# Look at the first 10 rows of the data frame.
+head(NYDATA, n=10L)
+# Look at the last 10 rows of the data frame.
+tail(NYDATA, n=10L)
+```
+
+
+
+## Cleaning data
+
+Next, let's clean up the data and separate data on species from data on natural communities.
+
+```{r}
+NY_Data<-filter(NYDATA, County != "not listed", County !=  "Lake Erie Open Waters", County != "Counties Unknown", County != "Atlantic Ocean and Long Island Sound", County != "Lake Ontario Open Waters")
+length(unique(NY_Data$County))
+```
+
+
+```{r summarize}
+# How many counties are there in New York?
+# Hint: Use the functions unique() and length()
+length(unique(NYDATA$County)) 
+#This is where we realized that there is one listed as "Not Listed", "County Unknown", and 'Open Waters," etc.  
+NYDATA2<-NYDATA[-grep("not listed", NYDATA$County),]
+NYDATA3<-NYDATA2[-grep("Lake Erie Open Waters", NYDATA2$County),]
+NYDATA4<-NYDATA3[-grep("Counties Unknown", NYDATA3$County),]
+NYDATA5<-NYDATA4[-grep("Atlantic Ocean and Long Island Sound", NYDATA4$County),]
+NYDATA6<-NYDATA5[-grep("Lake Ontario Open Waters", NYDATA5$County),]
+#62 counties after cleaning. 
+#Calling final dataset as something better
+NYDATA_Clean<-NYDATA6
+# Also note that there are some entries in the County column that are not 
+# actually counties - remove them.
+
+# Split the data frame into two separate data frames: one containing data on
+# animals and plants, and the other on natural communities.
+NYDATA_AnimalsPlants <- NYDATA6[ which(NYDATA6$Category!='Natural Community'),]
+NYDATA_NatCom<- NYDATA6[ which(NYDATA6$Category=='Natural Community'),]
+# Use the function table() to create a contingency table of counts for
+# taxonomic group and Federal listing status for different species.
+table(NYDATA_AnimalsPlants$Taxonomic.Group, NYDATA_AnimalsPlants$Federal.Listing.Status)
+# Do you notice any weird taxonomic groups from your table? 
+# Remove those entries.
+NYDATA_AnimalsPlants_Clean<-NYDATA_AnimalsPlants[-grep("Animal Assemblages", NYDATA_AnimalsPlants$Taxonomic.Group),]
+table(NYDATA_AnimalsPlants_Clean$Taxonomic.Group, NYDATA_AnimalsPlants_Clean$Federal.Listing.Status)
+# Check the dimensions of each data frame. How many entries do we have for each?
+dim(NYDATA_AnimalsPlants_Clean)
+dim(NYDATA_NatCom)
+```
+
+## Exploring data
+
+Before we determine what land to protect, let's first explore the data! Let's assume for now that this dataset contains a comprehensive record of all species found in New York.
+
+```{r explore}
+# What are the natural communities present in Monroe County? (list subsystems) 
+
+# How many animal species are found in Monroe County? What about plants?
+
+# What are the three Federally listed species in Monroe County?
+
+# How many species are found in all the counties of NY?
+
+# How many of these species are Federally listed?
+
+```
+
+## Plotting data
+
+The DEC has asked you to generate some plots to help visualize their data. Make sure all your plots have informative titles and axes.
+
+First, they want to know how species are listed.
+
+```{r plot1}
+# Make a barplot showing the proportion of Federally listed species for each 
+# category of the NY listing status.
+
+```
+
+The DEC ornithologist would like to know the diversity of bird species across the state.
+
+```{r plot2}
+# Plot the number of bird species in each county, again as a barplot.
+
+```
+
+## Determining areas to protect
+
+There are many ways we can determine areas of land that may be of interest to protect.
+
+```{r protect}
+# Which county has the highest number of species?
+
+# Which county has the highest diversity of natural communities (using subgroups)?
+
+# We can also work backwards by targeting species of interest. 
+# Some species only occur in one county in NY. Which county has the most 
+# county-specific species?
+
+# Which county has the highest proportion of Federally listed species?
+
+```
+
+**Question:** Based on your analyses, what areas would you recommend for the DEC's land acquisition and why? 
+
