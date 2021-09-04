@@ -35,6 +35,7 @@ You are in charge of helping the NYS DEC identify locations for land acquisition
 First, load the package `tidyverse`. 
 
 ```{r load_lib, message = FALSE}
+
 library(tidyverse)
 library(dplyr)
 ```
@@ -63,9 +64,11 @@ Next, let's quickly examine the data frame to make sure the data importation ste
 ```{r check}
 # How many rows and columns are there?
 dim(NYDATA) #Using dimension function
-# 20017 rows, and 12 columns.
+# 20017 rows and 12 columns.
 
 # What is the class of each column?
+
+#This approach goes column by column. Later I use `lapply` which does it all together. 
 class(NYDATA$County)
 class(NYDATA$Category)
 class(NYDATA$Taxonomic.Group)
@@ -84,9 +87,11 @@ class(NYDATA$Distribution.Status)
 lapply(NYDATA, class)
 
 # Look at the first 10 rows of the data frame.
+# Head tail are both functions in Python and R which show lines. 
+# Argument 10L shows that 10 lines are to be used as default is 6. 
 head(NYDATA, n=10L)
 # Look at the last 10 rows of the data frame.
-tail(NYDATA, n=10L)
+tail(NYDATA, n=10L) 
 ```
 
 
