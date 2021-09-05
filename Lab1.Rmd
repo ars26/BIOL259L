@@ -151,12 +151,12 @@ OnlyMC<-filter(NY_Data, County=="Monroe")
 MC_Fed<-filter(OnlyMC, Federal.Listing.Status!="not listed", Federal.Listing.Status!="not applicable")
 print(unique(MC_Fed$Common.Name))
 
-Fed_List<-filter(NC_Plants, Federal.Listing.Status == "Endangered")
-
 # How many species are found in all the counties of NY?
-
+print(length(unique(NY_Data$Scientific.Name)))
 # How many of these species are Federally listed?
-
+All_Fed<-filter(NY_Data, Federal.Listing.Status!="not listed", Federal.Listing.Status!="not applicable")
+dim(All_Fed)
+#199 species.
 ```
 
 ## Plotting data
