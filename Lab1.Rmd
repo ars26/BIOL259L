@@ -116,18 +116,18 @@ length(unique(NY_Data$County)) #Rechecking.
 # Using `which` function to first exclude everything but Natural Communities which is 
 # plants and animals. Then using Natural Communities to make a new file. 
 AnimalsPlants <- NY_Data[ which(NY_Data$Category!='Natural Community'),]
-NYDATA_NatCom<- NY_Data[ which(NY_Data$Category=='Natural Community'),]
+NatCom<- NY_Data[ which(NY_Data$Category=='Natural Community'),]
 # Use the function table() to create a contingency table of counts for
 # taxonomic group and Federal listing status for different species.
-table(NYDATA_AnimalsPlants$Taxonomic.Group, NYDATA_AnimalsPlants$Federal.Listing.Status)
+table(AnimalsPlants$Taxonomic.Group, AnimalsPlants$Federal.Listing.Status)
 # Do you notice any weird taxonomic groups from your table? 
 # Yes-- "appendages."
 # Remove those entries.
-NYDATA_AnimalsPlants_Clean<-NYDATA_AnimalsPlants[-grep("Animal Assemblages", NYDATA_AnimalsPlants$Taxonomic.Group),]
-table(NYDATA_AnimalsPlants_Clean$Taxonomic.Group, NYDATA_AnimalsPlants_Clean$Federal.Listing.Status)
+AnimalsPlants_Clean<-AnimalsPlants[-grep("Animal Assemblages", AnimalsPlants$Taxonomic.Group),]
+table(AnimalsPlants_Clean$Taxonomic.Group, AnimalsPlants_Clean$Federal.Listing.Status)
 # Check the dimensions of each data frame. How many entries do we have for each?
-dim(NYDATA_AnimalsPlants_Clean)
-dim(NYDATA_NatCom)
+dim(AnimalsPlants_Clean)
+dim(NatCom)
 ```
 
 ## Exploring data
