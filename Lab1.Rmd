@@ -128,6 +128,8 @@ table(AnimalsPlants_Clean$Taxonomic.Group, AnimalsPlants_Clean$Federal.Listing.S
 # Check the dimensions of each data frame. How many entries do we have for each?
 dim(AnimalsPlants_Clean)
 dim(NatCom)
+#NOJ
+
 ```
 
 ## Exploring data
