@@ -115,7 +115,7 @@ length(unique(NY_Data$County)) #Rechecking.
 # animals and plants, and the other on natural communities.
 # Using `which` function to first exclude everything but Natural Communities which is 
 # plants and animals. Then using Natural Communities to make a new file. 
-AnimalsPlants <- NY_Data[ which(NY_Data$Category!='Natural Community'),]
+AnimalsPlants <- NY_Data[ which(NY_Data$Category!='Natural Community'),] 
 NatCom<- NY_Data[ which(NY_Data$Category=='Natural Community'),]
 # Use the function table() to create a contingency table of counts for
 # taxonomic group and Federal listing status for different species.
