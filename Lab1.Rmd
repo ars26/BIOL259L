@@ -156,6 +156,7 @@ print(length(unique(NY_Data$Scientific.Name)))
 # How many of these species are Federally listed?
 All_Fed<-filter(NY_Data, Federal.Listing.Status!="not listed", Federal.Listing.Status!="not applicable")
 dim(All_Fed)
+
 #199 species.
 ```
 
