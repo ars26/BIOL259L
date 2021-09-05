@@ -243,10 +243,17 @@ protect3.1[which.max(protect3.1$Num_Species_3),]
 #Albany with 395. 
 
 # Which county has the highest proportion of Federally listed species?
+# Adding a notation of 1 if federally listed i.e. not "not listed" or NA. 
 protect4<-All_Fed %>%
   group_by(County, Federal.Listing.Status)  %>% 
-  summarise(n = n())  %>% 
+  summarise(n = n()) %>% 
+  group_by(County) %>% summarise(n = sum(n)) %>% 
   mutate(freq = n / sum(n))
+protect4[which.max(protect4$freq),]
+
+#Nassau with 4. 
+
+#fin. 
 ```
 
 **Question:** Based on your analyses, what areas would you recommend for the DEC's land acquisition and why? 
