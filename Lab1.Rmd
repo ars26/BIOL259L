@@ -67,7 +67,6 @@ dim(NYDATA) #Using dimension function
 # 20017 rows and 12 columns.
 
 # What is the class of each column?
-
 #This approach goes column by column. Later I use `lapply` which does it all together. 
 class(NYDATA$County)
 class(NYDATA$Category)
@@ -94,42 +93,35 @@ head(NYDATA, n=10L)
 tail(NYDATA, n=10L) 
 ```
 
-
-
 ## Cleaning data
 
 Next, let's clean up the data and separate data on species from data on natural communities.
 
-```{r}
-NY_Data<-filter(NYDATA, County != "not listed", County !=  "Lake Erie Open Waters", County != "Counties Unknown", County != "Atlantic Ocean and Long Island Sound", County != "Lake Ontario Open Waters")
-length(unique(NY_Data$County))
-```
-
-
 ```{r summarize}
 # How many counties are there in New York?
 # Hint: Use the functions unique() and length()
-length(unique(NYDATA$County)) 
-#This is where we realized that there is one listed as "Not Listed", "County Unknown", and 'Open Waters," etc.  
-NYDATA2<-NYDATA[-grep("not listed", NYDATA$County),]
-NYDATA3<-NYDATA2[-grep("Lake Erie Open Waters", NYDATA2$County),]
-NYDATA4<-NYDATA3[-grep("Counties Unknown", NYDATA3$County),]
-NYDATA5<-NYDATA4[-grep("Atlantic Ocean and Long Island Sound", NYDATA4$County),]
-NYDATA6<-NYDATA5[-grep("Lake Ontario Open Waters", NYDATA5$County),]
-#62 counties after cleaning. 
-#Calling final dataset as something better
-NYDATA_Clean<-NYDATA6
+length(unique(NYDATA$County))
+#There are 67 counties.
+
 # Also note that there are some entries in the County column that are not 
 # actually counties - remove them.
+#This is where we realized that there is one listed as "Not Listed", "County Unknown", and 'Open Waters," etc.  
+# I am using the filter function with the dataframe wherein the problematic counties are removed. I am using `!=` to remove the ones that are not counties and keep everything else. 
+NY_Data<-filter(NYDATA, County != "not listed", County !=  "Lake Erie Open Waters", County != "Counties Unknown", County != "Atlantic Ocean and Long Island Sound", County != "Lake Ontario Open Waters")
+length(unique(NY_Data$County)) #Rechecking. 
+#62 counties after cleaning. 
 
 # Split the data frame into two separate data frames: one containing data on
 # animals and plants, and the other on natural communities.
-NYDATA_AnimalsPlants <- NYDATA6[ which(NYDATA6$Category!='Natural Community'),]
-NYDATA_NatCom<- NYDATA6[ which(NYDATA6$Category=='Natural Community'),]
+# Using `which` function to first exclude everything but Natural Communities which is 
+# plants and animals. Then using Natural Communities to make a new file. 
+AnimalsPlants <- NY_Data[ which(NY_Data$Category!='Natural Community'),]
+NYDATA_NatCom<- NY_Data[ which(NY_Data$Category=='Natural Community'),]
 # Use the function table() to create a contingency table of counts for
 # taxonomic group and Federal listing status for different species.
 table(NYDATA_AnimalsPlants$Taxonomic.Group, NYDATA_AnimalsPlants$Federal.Listing.Status)
 # Do you notice any weird taxonomic groups from your table? 
+# Yes-- "appendages."
 # Remove those entries.
 NYDATA_AnimalsPlants_Clean<-NYDATA_AnimalsPlants[-grep("Animal Assemblages", NYDATA_AnimalsPlants$Taxonomic.Group),]
 table(NYDATA_AnimalsPlants_Clean$Taxonomic.Group, NYDATA_AnimalsPlants_Clean$Federal.Listing.Status)
