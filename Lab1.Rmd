@@ -123,7 +123,7 @@ NYDATA_Clean<-NYDATA6
 # actually counties - remove them.
 
 # Split the data frame into two separate data frames: one containing data on
-# animals and plants, and the other on natural communities.
+# animals and plants, and the other on natural communities. 
 NYDATA_AnimalsPlants <- NYDATA6[ which(NYDATA6$Category!='Natural Community'),]
 NYDATA_NatCom<- NYDATA6[ which(NYDATA6$Category=='Natural Community'),]
 # Use the function table() to create a contingency table of counts for
