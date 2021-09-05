@@ -35,7 +35,7 @@ You are in charge of helping the NYS DEC identify locations for land acquisition
 First, load the package `tidyverse`. 
 
 ```{r load_lib, message = FALSE}
-
+# Loading the packages I will need. 
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
@@ -85,6 +85,8 @@ class(NYDATA$Distribution.Status)
 #or
 
 lapply(NYDATA, class)
+#The lapply function applies the `class` function over
+# a list or vector i.e. the dataframe.
 
 # Look at the first 10 rows of the data frame.
 # Head tail are both functions in Python and R which show lines. 
@@ -93,6 +95,8 @@ head(NYDATA, n=10L)
 # Look at the last 10 rows of the data frame.
 tail(NYDATA, n=10L) 
 ```
+The data set (uncleaned) has 20017 rows and 12 columns.
+
 
 ## Cleaning data
 
@@ -106,30 +110,43 @@ length(unique(NYDATA$County))
 
 # Also note that there are some entries in the County column that are not 
 # actually counties - remove them.
-#This is where we realized that there is one listed as "Not Listed", "County Unknown", and 'Open Waters," etc.  
-# I am using the filter function with the dataframe wherein the problematic counties are removed. I am using `!=` to remove the ones that are not counties and keep everything else. 
-NY_Data<-filter(NYDATA, County != "not listed", County !=  "Lake Erie Open Waters", County != "Counties Unknown", County != "Atlantic Ocean and Long Island Sound", County != "Lake Ontario Open Waters")
+# This is where we realized that there is one listed as "Not Listed", 
+# "County Unknown", and 'Open Waters," etc.  
+# I am using the filter function with the data frame wherein 
+# the problematic counties are removed. 
+# I am using `!=` to remove the ones that are not counties 
+# and keep everything else. 
+
+NY_Data<-filter(NYDATA, County != "not listed", 
+                County !=  "Lake Erie Open Waters", 
+                County != "Counties Unknown", 
+                County != "Atlantic Ocean and Long Island Sound", 
+                County != "Lake Ontario Open Waters")
 length(unique(NY_Data$County)) #Rechecking. 
 #62 counties after cleaning. 
 
 # Split the data frame into two separate data frames: one containing data on
 # animals and plants, and the other on natural communities.
 # Using `which` function to first exclude everything but Natural Communities which is 
-# plants and animals. Then using Natural Communities to make a new file. 
+# plants and animals. Then using Natural Communities only to make a new file. 
 AnimalsPlants <- NY_Data[ which(NY_Data$Category!='Natural Community'),] 
 NatCom<- NY_Data[ which(NY_Data$Category=='Natural Community'),]
 # Use the function table() to create a contingency table of counts for
 # taxonomic group and Federal listing status for different species.
 table(AnimalsPlants$Taxonomic.Group, AnimalsPlants$Federal.Listing.Status)
 # Do you notice any weird taxonomic groups from your table? 
-# Yes-- "appendages."
+# Yes-- "Animal Assemblages."
 # Remove those entries.
+# Using the `grep` function which matches the phrase/word. 
+# -grep removes it. 
 AnimalsPlants_Clean<-AnimalsPlants[-grep("Animal Assemblages", AnimalsPlants$Taxonomic.Group),]
 table(AnimalsPlants_Clean$Taxonomic.Group, AnimalsPlants_Clean$Federal.Listing.Status)
 # Check the dimensions of each data frame. How many entries do we have for each?
 dim(AnimalsPlants_Clean)
 dim(NatCom)
 ```
+For Animal and plants data frame we have 18960 entries, while we have 937 for plants. 
+
 
 ## Exploring data
 
@@ -138,8 +155,13 @@ Before we determine what land to protect, let's first explore the data! Let's as
 ```{r explore}
 # What are the natural communities present in Monroe County? (list subsystems) 
 # Using `NatCom` file. 
+# Much like filter before, we are making a new file and filtering on Monroe county. 
 NC_MC<-filter(NatCom, County=="Monroe")
+#This print unique gives us the taxonomic subgroups.
 print(unique(NC_MC$Taxonomic.Subgroup))
+
+
+#----- left here. 
 
 # How many animal species are found in Monroe County? What about plants?
 NC_Animals<-filter(AnimalsPlants_Clean, Category=="Animal")
