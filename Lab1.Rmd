@@ -38,6 +38,7 @@ First, load the package `tidyverse`.
 
 library(tidyverse)
 library(dplyr)
+library(ggplot2)
 ```
 
 ## The dataset
@@ -169,7 +170,29 @@ First, they want to know how species are listed.
 ```{r plot1}
 # Make a barplot showing the proportion of Federally listed species for each 
 # category of the NY listing status.
+print(unique(NY_Data$NY.Listing.Status))
+print(unique(NY_Data$Federal.Listing.Status))
+P1<-NY_Data %>%
+  group_by(NY.Listing.Status, Federal.Listing.Status)  %>% 
+  summarise(n = n())  %>% 
+  mutate(freq = n / sum(n))
 
+barplot(P1$freq)
+
+#Since the question asks for fed listed species, lets remove not listed and not app. This was already done before and is called All Fed.  
+# Help from https://stackoverflow.com/questions/24576515/relative-frequencies-proportions-with-dplyr.
+print(unique(All_Fed$NY.Listing.Status))
+print(unique(All_Fed$Federal.Listing.Status))
+P1.1<-All_Fed %>%
+  group_by(NY.Listing.Status, Federal.Listing.Status)  %>% 
+  summarise(n = n())  %>% 
+  mutate(freq = n / sum(n))
+par(mar=c(5,5,1,1))
+barplot(P1.1$freq, names.arg=c("Endangered+Candidate","Endangered+Endangered","Endangered+Endangered/Threatened","Endangered+Threatend","Not Listed+Endangered", "Not Listed+Threatened", "Protected+Endangered", "Threatened+Threatened"), col="#69b3a2", horiz=T , las=2)
+bp1<-ggplot(P1.1, aes(x=NY.Listing.Status, y=freq, fill=Federal.Listing.Status)) +
+  geom_bar(stat="identity")
+bp1+scale_fill_brewer(palette="Dark2")
+bp1
 ```
 
 The DEC ornithologist would like to know the diversity of bird species across the state.
@@ -177,6 +200,16 @@ The DEC ornithologist would like to know the diversity of bird species across th
 ```{r plot2}
 # Plot the number of bird species in each county, again as a barplot.
 
+P2<-filter(NY_Data, Taxonomic.Group=="Birds")
+
+P2.1<-group_by(P2, County) %>% 
+  summarize(Num_Birds=length(unique(Scientific.Name)))
+barplot(P2.1$Num_Birds, las=2, horiz=F)
+bp2<-ggplot(P2.1, aes(x=County, y=Num_Birds)) +
+  geom_bar(stat="identity")
+bp2<-bp2+scale_fill_brewer(palette="Dark2")
+bp2<-bp2+theme(axis.text.x = element_text(angle = 90))
+bp2
 ```
 
 ## Determining areas to protect
@@ -185,15 +218,35 @@ There are many ways we can determine areas of land that may be of interest to pr
 
 ```{r protect}
 # Which county has the highest number of species?
-
+protect1<-group_by(NY_Data, County) %>% 
+  summarize(Num_Species=length(unique(Scientific.Name)))
+protect1[which.max(protect1$Num_Species),]
+#Suffolk with 700
 # Which county has the highest diversity of natural communities (using subgroups)?
-
+protect2<-group_by(NY_Data, County) %>% 
+  summarize(Num_Div=length(unique(Taxonomic.Subgroup)))
+protect2[which.max(protect2$Num_Div),]
+#Suffolk with 82. 
 # We can also work backwards by targeting species of interest. 
 # Some species only occur in one county in NY. Which county has the most 
 # county-specific species?
 
-# Which county has the highest proportion of Federally listed species?
+#Make a dataset which filters out rows if their species name is repeated. Then we can just groupby and count. 
+protect3<-NY_Data %>%
+     group_by(Scientific.Name) %>%
+     filter (!duplicated(Scientific.Name))
+protect3.1<-group_by(protect3, County) %>% 
+  summarize(Num_Species_3=length(unique(Scientific.Name)))
 
+protect3.1[which.max(protect3.1$Num_Species_3),]
+
+#Albany with 395. 
+
+# Which county has the highest proportion of Federally listed species?
+protect4<-All_Fed %>%
+  group_by(County, Federal.Listing.Status)  %>% 
+  summarise(n = n())  %>% 
+  mutate(freq = n / sum(n))
 ```
 
 **Question:** Based on your analyses, what areas would you recommend for the DEC's land acquisition and why? 
