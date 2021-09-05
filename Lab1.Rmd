@@ -128,8 +128,6 @@ table(AnimalsPlants_Clean$Taxonomic.Group, AnimalsPlants_Clean$Federal.Listing.S
 # Check the dimensions of each data frame. How many entries do we have for each?
 dim(AnimalsPlants_Clean)
 dim(NatCom)
-#NOJ
-
 ```
 
 ## Exploring data
@@ -138,10 +136,22 @@ Before we determine what land to protect, let's first explore the data! Let's as
 
 ```{r explore}
 # What are the natural communities present in Monroe County? (list subsystems) 
+# Using `NatCom` file. 
+NC_MC<-filter(NatCom, County=="Monroe")
+print(unique(NC_MC$Taxonomic.Subgroup))
 
 # How many animal species are found in Monroe County? What about plants?
+NC_Animals<-filter(AnimalsPlants_Clean, Category=="Animal")
+NC_Plants<-filter(AnimalsPlants_Clean, Category=="Plant")
+print(length(unique(NC_Animals$Taxonomic.Subgroup)))
+print(length(unique(NC_Plants$Taxonomic.Subgroup)))
 
 # What are the three Federally listed species in Monroe County?
+OnlyMC<-filter(NY_Data, County=="Monroe")
+MC_Fed<-filter(OnlyMC, Federal.Listing.Status!="not listed", Federal.Listing.Status!="not applicable")
+print(unique(MC_Fed$Common.Name))
+
+Fed_List<-filter(NC_Plants, Federal.Listing.Status == "Endangered")
 
 # How many species are found in all the counties of NY?
 
