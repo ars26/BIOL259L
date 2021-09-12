@@ -1,10 +1,10 @@
 ---
 title: "Bio 259L/459L Lab 1: Intro to R"
 author: "Syed Arsalan Ghani"
-date: "Deadline: 11:59 pm Sunday 12 Sept."
+date: "Deadline: 11:59 pm Sunday, 12 Sept."
 output:
   pdf_document: default
-  html_notebook: default
+  #html_notebook: default
 ---
 
 ```{r setup, include = FALSE}
@@ -46,6 +46,7 @@ library(ggplot2)
 Go to the [NYS DEC website](https://data.ny.gov/Energy-Environment/Biodiversity-by-County-Distribution-of-Animals-Pla/tk82-7km5) to learn more about the data we are using. Be sure to read the column descriptions. 
 
 **Question:** This dataset was compiled from three databases. What are the three databases that contributed to this dataset?
+
 The three databases are:
 1) _New York Natural Heritage Program biodiversity database_, which looks at rare plants and animals, 
 2) _2nd NYS Breeding Bird Atlas Project database_, which looks at breeding birds between 2000-2005,
@@ -68,7 +69,8 @@ dim(NYDATA) #Using dimension function
 # 20017 rows and 12 columns.
 
 # What is the class of each column?
-#This approach goes column by column. Later I use `lapply` which does it all together. 
+# This approach goes column by column. 
+# Later I use `lapply` which does it all together. 
 class(NYDATA$County)
 class(NYDATA$Category)
 class(NYDATA$Taxonomic.Group)
@@ -85,7 +87,7 @@ class(NYDATA$Distribution.Status)
 #or
 
 lapply(NYDATA, class)
-#The lapply function applies the `class` function over
+# The lapply function applies the `class` function over
 # a list or vector i.e. the dataframe.
 
 # Look at the first 10 rows of the data frame.
@@ -95,7 +97,7 @@ head(NYDATA, n=10L)
 # Look at the last 10 rows of the data frame.
 tail(NYDATA, n=10L) 
 ```
-The data set (uncleaned) has 20017 rows and 12 columns.
+###  The data set (uncleaned) has 20017 rows and 12 columns. The classes are shown above via two methods, and head and tail is also explained. 
 
 
 ## Cleaning data
@@ -104,6 +106,8 @@ Next, let's clean up the data and separate data on species from data on natural 
 
 ```{r summarize}
 # How many counties are there in New York?
+# Wikipedia postulates that there 62 counties. Our data set, however, shows 67. 
+
 # Hint: Use the functions unique() and length()
 length(unique(NYDATA$County))
 #There are 67 counties.
@@ -116,7 +120,8 @@ length(unique(NYDATA$County))
 # the problematic counties are removed. 
 # I am using `!=` to remove the ones that are not counties 
 # and keep everything else. 
-
+# I know what counties to remove because I looked at them via 
+# print(unique(NYDATA$County))
 NY_Data<-filter(NYDATA, County != "not listed", 
                 County !=  "Lake Erie Open Waters", 
                 County != "Counties Unknown", 
@@ -127,8 +132,9 @@ length(unique(NY_Data$County)) #Rechecking.
 
 # Split the data frame into two separate data frames: one containing data on
 # animals and plants, and the other on natural communities.
-# Using `which` function to first exclude everything but Natural Communities which is 
-# plants and animals. Then using Natural Communities only to make a new file. 
+# Using `which` function to first exclude everything but Natural Communities
+# which is plants and animals. Then using Natural Communities only to make a 
+# new file. 
 AnimalsPlants <- NY_Data[ which(NY_Data$Category!='Natural Community'),] 
 NatCom<- NY_Data[ which(NY_Data$Category=='Natural Community'),]
 
@@ -140,13 +146,15 @@ table(AnimalsPlants$Taxonomic.Group, AnimalsPlants$Federal.Listing.Status)
 # Remove those entries.
 # Using the `grep` function which matches the phrase/word. 
 # -grep removes it. 
-AnimalsPlants_Clean<-AnimalsPlants[-grep("Animal Assemblages", AnimalsPlants$Taxonomic.Group),]
-table(AnimalsPlants_Clean$Taxonomic.Group, AnimalsPlants_Clean$Federal.Listing.Status)
+AnimalsPlants_Clean<-AnimalsPlants[-grep("Animal Assemblages", 
+                                         AnimalsPlants$Taxonomic.Group),]
+table(AnimalsPlants_Clean$Taxonomic.Group, 
+      AnimalsPlants_Clean$Federal.Listing.Status)
 # Check the dimensions of each data frame. How many entries do we have for each?
 dim(AnimalsPlants_Clean)
 dim(NatCom)
 ```
-For Animal and plants data frame we have 18960 entries, while we have 937 for plants. 
+### Initially there were 67 counties, and we corrected it by reducing it to 62. Then we divided the dataframe in two based on natural communities and plants & animals. Animal assemblages was also removed from the later dataset. The final dataset for Animal and plants has 18960 entries, while we have 937 for plants. 
 
 ## Exploring data
 
@@ -155,13 +163,13 @@ Before we determine what land to protect, let's first explore the data! Let's as
 ```{r explore}
 # What are the natural communities present in Monroe County? (list subsystems) 
 # Using `NatCom` file. 
-# Much like filter before, we are making a new file and filtering on Monroe county. 
+# Much like filter before, we are making a new file and filtering on Monroe.  
 NC_MC<-filter(NatCom, County=="Monroe")
 #This `print unique` gives us the taxonomic subgroups.
 print(unique(NC_MC$Taxonomic.Subgroup))
 
 # How many animal species are found in Monroe County? What about plants?
-#Filtering by just "Animal" and "Plant" in MC, then repeating above. 
+# Filtering by just "Animal" and "Plant" in MC, then repeating above. 
 Animals_Plants_MC<-filter(AnimalsPlants_Clean, County=="Monroe")
 Plants_MC<-filter(Animals_Plants_MC, Category=="Plant")
 Animals_MC<-filter(Animals_Plants_MC, Category=="Animal")
@@ -172,20 +180,22 @@ print(length(unique(Plants_MC$Scientific.Name)))
 # What are the three Federally listed species in Monroe County?
 OnlyMC<-filter(NY_Data, County=="Monroe")
 #Remove non-federally listed species by using not listed and not applicable. 
-MC_Fed<-filter(OnlyMC, Federal.Listing.Status!="not listed", Federal.Listing.Status!="not applicable")
+MC_Fed<-filter(OnlyMC, Federal.Listing.Status!="not listed", 
+               Federal.Listing.Status!="not applicable")
 print(unique(MC_Fed$Common.Name))
-
+print(unique(MC_Fed$Scientific.Name))
 # How many species are found in all the counties of NY?
 print(length(unique(AnimalsPlants_Clean$Scientific.Name)))
 #1325
 
 # How many of these species are Federally listed?
-All_Fed<-filter(AnimalsPlants_Clean, Federal.Listing.Status!="not listed", Federal.Listing.Status!="not applicable")
-dim(All_Fed)
+All_Fed<-filter(AnimalsPlants_Clean, Federal.Listing.Status!="not listed", 
+                Federal.Listing.Status!="not applicable")
+length(unique((All_Fed$Scientific.Name)))
 
-#199 species. 
+#26 species. 
 ```
-The unique taxonomic groups are printed above. There are 236 animal and 141 plant species found in Monroe County. The three federally-listed species in MC are American Burying Beetle, Northern Long-eared Bat, Bog Turtle. Overall there are 1325 species in NY counties, with 199 being Federally listed. 
+### The unique taxonomic groups are printed above. There are 236 animal and 141 plant species found in Monroe County. The three federally-listed species in MC are American Burying Beetle, Northern Long-eared Bat, Bog Turtle, i.e. _Nicrophorus americanus, Myotis septentrionalis, Glyptemys muhlenbergii._ Overall there are 1325 species in NY counties, with 26 being Federally listed. 
 
 
 ## Plotting data
@@ -194,29 +204,34 @@ The DEC has asked you to generate some plots to help visualize their data. Make 
 
 First, they want to know how species are listed.
 
+### Basically my game plan here is to just use animals and birds (no natural communities), and whenever a species is federally listed, I put them down as *Listed* while others remain *Not Listed.* Then I am grouping this re-imagined dataset by NY's Listing Status and calculating frequencies. The frequencies are then plotted via stacked barplots. 
 ```{r plot1}
 # Make a barplot showing the proportion of Federally listed species for each 
 # category of the NY listing status.
-# print(unique(NY_Data$NY.Listing.Status))
-# print(unique(NY_Data$Federal.Listing.Status))
-#Since the question asks for fed listed species, lets remove not listed and not app. 
-# This was already done before and is called All Fed.  
-# Help from https://stackoverflow.com/questions/24576515/relative-frequencies-proportions-with-dplyr.
-# print(unique(All_Fed$NY.Listing.Status))
-# print(unique(All_Fed$Federal.Listing.Status))
-# First lets group by listing status and pipe to summarizing the total numbers. 
-# Then n will be assigned the number of observations. 
-# Then we calculate frequency normally. 
-P1.1<-All_Fed %>%
+# Help from 
+# stackoverflow.com/questions/
+# 24576515/relative-frequencies-proportions-with-dplyr.
+
+P1.3_YN<-AnimalsPlants_Clean # Just animal and plants. 
+P1.3_YN$Federal.Listing.Status[P1.3_YN$Federal.Listing.Status=="not listed"] <-
+  "Not Listed"
+P1.3_YN$
+  Federal.Listing.Status[!P1.3_YN$Federal.Listing.Status==
+                           "Not Listed"] <-"Listed"
+
+
+P1.4_Final<-P1.3_YN %>% # Group via NY. 
   group_by(NY.Listing.Status, Federal.Listing.Status)  %>% 
-  summarise(n = n())  %>% 
+  summarise(n = n())  %>% # N = number of observations.
   mutate(freq = n / sum(n))
-#Using ggplot to make a propotion barplot. 
-bp1<-ggplot(P1.1, aes(x=NY.Listing.Status, y=freq, fill=Federal.Listing.Status)) +
+
+bp1<-ggplot(P1.4_Final, aes(x=NY.Listing.Status, y=freq, 
+                            fill=Federal.Listing.Status)) +
   geom_bar(stat="identity")
-bp1<-bp1+scale_fill_brewer(palette="Dark2")+labs(title="Proportion of Fed Listings w/ NY Listings", x= "NY Listed Status", y="Frequency")
-labels_better <- c("Endangered", "Not Listed", "Protected (No Open)", "Threatened")
-bp1<-bp1+scale_x_discrete(labels= labels_better)+ guides(fill=guide_legend(title="Fed Listing"))
+bp1<-bp1+scale_fill_brewer(palette="Dark2")+
+  labs(title="Proportion of Fed Listings w/ NY Listings", 
+       x= "NY Listed Status", y="Frequency")
+bp1<-bp1+theme(axis.text.x = element_text(angle = 90))
 bp1
 ```
 
@@ -247,27 +262,25 @@ bp2
 There are many ways we can determine areas of land that may be of interest to protect.
 
 ```{r protect}
-
-# For the first analysis, I am using the plants-animals ONLY dataset as "species" is what 
-# we have been referring to in the case of animals and plants only. 
-
 # Which county has the highest number of species?
 # Using group by counties piping to summarize and 
-# number of species to get the answer. `Which.max` figures out row name. 
+# number of species to get the answer. 
+# `Which.max` figures out row name. 
+# Using just plants-animals.
 
 protect1<-group_by(AnimalsPlants_Clean, County) %>% 
   summarize(Num_Species=length(unique(Scientific.Name)))
 protect1[which.max(protect1$Num_Species),]
 #Suffolk with 650 species. 
 
-# Here I am using the dataset of animals, plants and natural comms. 
 # Which county has the highest diversity of natural communities (using subgroups)?
 # Using group by counties piping to summarize and 
 # number of tax. groups to get the answer. `Which.max` figures out row name.
-protect2<-group_by(NY_Data, County) %>% 
+# Here I am using the dataset of natural comms. 
+protect2<-group_by(NatCom, County) %>% 
   summarize(Num_Div=length(unique(Taxonomic.Subgroup)))
 protect2[which.max(protect2$Num_Div),]
-#Suffolk with 82. 
+#Suffolk with 12.
 
 # We can also work backwards by targeting species of interest. 
 # Some species only occur in one county in NY. Which county has the most 
@@ -293,14 +306,13 @@ protect4<-All_Fed %>%
   mutate(freq = n / sum(n))
 protect4[which.max(protect4$freq),]
 
-#Nassau and Suffolk with 0.040201005 proportions.  
-
-#fin. 
+#Nassau and Suffolk with 0.040201005 proportion.  
 ```
+
 
 **Question:** Based on your analyses, what areas would you recommend for the DEC's land acquisition and why? 
 
-I personally would recommend two kinds of areas for the DEC's land acquisition. The first one would be the counties of Nassau and Suffolk because they both have 8 (the highest) numbers of Federally listed species. They are also right next to each other, see below, and this would make it easier, administratively, for the DEC to protect and rehabilitate the area. Secondly, I would suggest the area where there is highest overlap of NY Listing Status and Federal Listing Status of Threatened and Endangered. We saw that earlier in the lab with the proportion graphs as well. This is important because both state scientists and federal scientists and conservationists find those species in those areas to be vulnerable and we should heed their warnings ASAP. 
+I personally would recommend two kinds of areas for the DEC's land acquisition. The first one would be the counties of Nassau and Suffolk because they both have 8 (the highest) numbers of Federally listed species. They are also right next to each other, see below, and this would make it easier, administratively, for the DEC to protect and rehabilitate the area. Secondly, I would suggest the area where there is highest overlap of NY Listing Status and Federal Listing Status of Threatened and Endangered. We saw that earlier in the lab with the proportion graphs as well. This is important because both state scientists and federal scientists and conservationists find those species in those areas to be vulnerable and we should heed their warnings ASAP. This would imply areas where NY's "Protected, No Open Species" are found. 
 
 ![Nassau and Suffolk counties via National Association of Teachers of Singing](~/Desktop/Chen Class/LabsChen/Lab1v2/BIOL259L/MAP+NSQ.jpg) 
 
